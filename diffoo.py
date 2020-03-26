@@ -1,0 +1,76 @@
+#!/usr/bin/python3
+# -*- coding:utf-8 -*-
+import tkinter
+from tkinter import filedialog
+import os
+import difflib
+import sys
+import base64
+
+from PyQt5 import QtWidgets,QtGui
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtWebEngineWidgets import *
+
+# 生成LOGO
+LOGO_URI = './favicon_t.jpg'
+IMG = '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'
+
+if not os.path.isfile(LOGO_URI):
+    imgdata = base64.b64decode(IMG) 
+    file = open(LOGO_URI,'wb')
+    file.write(imgdata)
+    file.close()
+
+root = tkinter.Tk()    # 创建一个Tkinter.Tk()实例
+root.withdraw()       # 将Tkinter.Tk()实例隐藏
+default_dir = r"文件路径"
+file_path_first = filedialog.askopenfilename(title=u'选择文件', initialdir=(os.path.expanduser(default_dir)))
+print(file_path_first)
+file_path_second = filedialog.askopenfilename(title=u'选择文件', initialdir=(os.path.expanduser(default_dir)))
+print(file_path_second)
+
+def readfile(filename): # 文件读取分隔函数
+    try:
+        fileHandle = open(filename, 'r', encoding='utf-8')
+        text = fileHandle.read().splitlines() # 读取后以行进行分隔
+        fileHandle.close()
+        return text
+    except IOError as error:
+        sys.exit()
+
+
+text1_line = readfile(file_path_first)
+text2_line = readfile(file_path_second)
+d = difflib.HtmlDiff()
+diffContent = d.make_file(text1_line, text2_line)
+
+class UI(QMainWindow):
+    def __init__(self, urlcontent):
+        global LOGO_URI
+        super(UI, self).__init__()
+        self.setWindowTitle('Windows Diffoo 文件对比')
+        self.resize(1024,768)
+        self.setWindowIcon(QtGui.QIcon(LOGO_URI))
+        self.tabs = QtWidgets.QTabWidget()
+        self.tabs.setDocumentMode(True)
+        self.tabs.setTabsClosable(True)
+        self.tabs_layout = QtWidgets.QGridLayout()
+        self.tabs.setLayout(self.tabs_layout)
+        self.url_edit = QtWidgets.QLineEdit()
+
+
+        self.browser = QWebEngineView()
+		
+		# 给浏览器内核设置html内容
+        self.browser.setHtml(urlcontent)
+        self.tabs_layout.addWidget(self.browser)
+        self.browser.loadFinished.connect(lambda :self.tabs.setTabText(0,self.browser.page().title()))
+        self.setCentralWidget(self.tabs)
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    gui = UI(diffContent)
+    gui.show()
+    sys.exit(app.exec_())
